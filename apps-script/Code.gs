@@ -63,6 +63,7 @@ function getSheet(name) {
   if (!sh) {
     sh = ss.insertSheet(name);
     var headers = {
+      Imoveis:     ['id','nome','mesReajuste','diaVencimentoPadrao','valorPadrao','observacoes','dataCadastro'],
       Clientes:    ['id','nome','telefone','email','observacoes','dataCadastro'],
       Contratos:   ['id','clienteId','imovel','valor','diaVencimento','dataInicio','dataFim','status','observacoes'],
       Pagamentos:  ['id','contratoId','clienteId','mesReferencia','dataVencimento','dataPagamento','valor','status','observacoes'],
@@ -123,6 +124,10 @@ function doPost(e) {
 function router(action, params, data) {
   switch(action) {
     case 'getDashboard':      return getDashboard();
+    case 'getImoveis':        return getImoveis();
+    case 'getImovel':         return getImovel(params.id);
+    case 'saveImovel':        return saveImovel(data);
+    case 'deleteImovel':      return deleteRow('Imoveis', data.id);
     case 'getClientes':       return getClientes();
     case 'getCliente':        return getCliente(params.id);
     case 'saveCliente':       return saveCliente(data);
@@ -147,6 +152,7 @@ function router(action, params, data) {
 function getDashboard() {
   var contratos = sheetToObjects(getSheet('Contratos'));
   var pagamentos = sheetToObjects(getSheet('Pagamentos'));
+  var imoveis = sheetToObjects(getSheet('Imoveis'));
   var now = new Date();
   var mes = now.getMonth() + 1;
   var ano = now.getFullYear();
@@ -176,10 +182,10 @@ function getDashboard() {
 
     if (diff < 0) {
       vencidos++;
-      proximosVencimentos.push({ contratoId: c.id, clienteNome: getClienteNome(c.clienteId), imovel: c.imovel, diaVencimento: diaV, diasRestantes: diff });
+      proximosVencimentos.push({ contratoId: c.id, clienteNome: getClienteNome(c.clienteId), imovel: getImovelNome(c.imovel, imoveis), diaVencimento: diaV, diasRestantes: diff });
     } else if (diff <= 5) {
       vencendo++;
-      proximosVencimentos.push({ contratoId: c.id, clienteNome: getClienteNome(c.clienteId), imovel: c.imovel, diaVencimento: diaV, diasRestantes: diff });
+      proximosVencimentos.push({ contratoId: c.id, clienteNome: getClienteNome(c.clienteId), imovel: getImovelNome(c.imovel, imoveis), diaVencimento: diaV, diasRestantes: diff });
     }
   });
 
@@ -191,7 +197,7 @@ function getDashboard() {
     .slice(0, 10)
     .map(function(p){
       var c = contratos.find(function(x){ return x.id === p.contratoId; }) || {};
-      return { clienteNome: getClienteNome(p.clienteId), imovel: c.imovel, mesReferencia: p.mesReferencia, dataPagamento: p.dataPagamento, valor: p.valor };
+      return { clienteNome: getClienteNome(p.clienteId), imovel: getImovelNome(c.imovel, imoveis), mesReferencia: p.mesReferencia, dataPagamento: p.dataPagamento, valor: p.valor };
     });
 
   return { totalAtivos: totalAtivos, pagosMes: pagosMes, vencendo: vencendo, vencidos: vencidos, receitaMes: receitaMes, receitaPrevista: receitaPrevista, proximosVencimentos: proximosVencimentos, pagamentosRecentes: pagRecentes };
@@ -201,6 +207,51 @@ function getClienteNome(clienteId) {
   var clientes = sheetToObjects(getSheet('Clientes'));
   var c = clientes.find(function(x){ return x.id === clienteId; });
   return c ? c.nome : 'Desconhecido';
+}
+
+// =============================================
+//  IMOVEIS
+// =============================================
+function getImoveis() {
+  var imoveis = sheetToObjects(getSheet('Imoveis'));
+  var contratos = sheetToObjects(getSheet('Contratos'));
+  imoveis = imoveis.filter(function(i){ return i.id; }).map(function(i) {
+    i.totalContratos = contratos.filter(function(c){ return c.imovel === i.id; }).length;
+    return i;
+  });
+  return { data: imoveis };
+}
+
+function getImovel(id) {
+  var imoveis = sheetToObjects(getSheet('Imoveis'));
+  var i = imoveis.find(function(x){ return x.id === id; });
+  if (!i) throw new Error('Imóvel não encontrado');
+  return { data: i };
+}
+
+function saveImovel(data) {
+  var sh = getSheet('Imoveis');
+  var rows = sh.getDataRange().getValues();
+  var headers = rows[0];
+  if (data.id) {
+    for (var i = 1; i < rows.length; i++) {
+      if (String(rows[i][0]) === String(data.id)) {
+        sh.getRange(i+1, 1, 1, headers.length).setValues([[
+          data.id, data.nome||'', data.mesReajuste||'', data.diaVencimentoPadrao||'', data.valorPadrao||0, data.observacoes||'', rows[i][6]||today()
+        ]]);
+        return { ok: true };
+      }
+    }
+  }
+  var id = genId();
+  sh.appendRow([id, data.nome||'', data.mesReajuste||'', data.diaVencimentoPadrao||'', data.valorPadrao||0, data.observacoes||'', today()]);
+  return { ok: true, id: id };
+}
+
+function getImovelNome(imovelId, imoveisList) {
+  if (!imoveisList) imoveisList = sheetToObjects(getSheet('Imoveis'));
+  var i = imoveisList.find(function(x){ return x.id === imovelId; });
+  return i ? i.nome : (imovelId || 'Desconhecido');
 }
 
 // =============================================
@@ -249,6 +300,7 @@ function getContratos() {
   var contratos = sheetToObjects(getSheet('Contratos'));
   var pagamentos = sheetToObjects(getSheet('Pagamentos'));
   var clientes = sheetToObjects(getSheet('Clientes'));
+  var imoveis = sheetToObjects(getSheet('Imoveis'));
   var now = new Date();
   var mes = now.getMonth() + 1;
   var ano = now.getFullYear();
@@ -257,6 +309,7 @@ function getContratos() {
   contratos = contratos.filter(function(c){ return c.id; }).map(function(c) {
     var cli = clientes.find(function(x){ return x.id === c.clienteId; });
     c.clienteNome = cli ? cli.nome : 'Desconhecido';
+    c.imovelNome = getImovelNome(c.imovel, imoveis);
     var pagMes = pagamentos.find(function(p){ return p.contratoId === c.id && p.mesReferencia === mesKey && p.status === 'pago'; });
     if (pagMes) { c.statusAtual = 'pago'; return c; }
     var diaV = parseInt(c.diaVencimento) || 10;
@@ -274,8 +327,10 @@ function getContrato(id) {
   if (!c) throw new Error('Contrato não encontrado');
   var clientes = sheetToObjects(getSheet('Clientes'));
   var pagamentos = sheetToObjects(getSheet('Pagamentos'));
+  var imoveis = sheetToObjects(getSheet('Imoveis'));
   var cli = clientes.find(function(x){ return x.id === c.clienteId; });
   c.clienteNome = cli ? cli.nome : 'Desconhecido';
+  c.imovelNome = getImovelNome(c.imovel, imoveis);
   var now = new Date(); var mes = now.getMonth()+1; var ano = now.getFullYear();
   var mesKey = ano+'-'+String(mes).padStart(2,'0');
   var pagMes = pagamentos.find(function(p){ return p.contratoId===id && p.mesReferencia===mesKey && p.status==='pago'; });
@@ -321,11 +376,12 @@ function getPagamentos(contratoId) {
   var pags = sheetToObjects(getSheet('Pagamentos'));
   var contratos = sheetToObjects(getSheet('Contratos'));
   var clientes = sheetToObjects(getSheet('Clientes'));
+  var imoveis = sheetToObjects(getSheet('Imoveis'));
   pags = pags.filter(function(p){ return p.id && (!contratoId || p.contratoId === contratoId); });
   pags = pags.map(function(p) {
     var c = contratos.find(function(x){ return x.id === p.contratoId; }) || {};
     var cl = clientes.find(function(x){ return x.id === p.clienteId; }) || {};
-    p.imovel = c.imovel || '';
+    p.imovel = getImovelNome(c.imovel, imoveis);
     p.clienteNome = cl.nome || '';
     return p;
   });
@@ -395,6 +451,7 @@ function checkVencimentos() {
   var contratos = sheetToObjects(getSheet('Contratos'));
   var pagamentos = sheetToObjects(getSheet('Pagamentos'));
   var clientes = sheetToObjects(getSheet('Clientes'));
+  var imoveis = sheetToObjects(getSheet('Imoveis'));
   var logs = sheetToObjects(getSheet('AlertasLog'));
   var logSh = getSheet('AlertasLog');
 
@@ -407,6 +464,7 @@ function checkVencimentos() {
   contratos.forEach(function(c) {
     if (!c.id) return;
     var cli = clientes.find(function(x){ return x.id === c.clienteId; }) || { nome: 'Cliente' };
+    var imovNome = getImovelNome(c.imovel, imoveis);
     var pagMes = pagamentos.find(function(p){ return p.contratoId===c.id && p.mesReferencia===mesKey && p.status==='pago'; });
     if (pagMes) return;
 
@@ -426,7 +484,7 @@ function checkVencimentos() {
       ? '[VENCIDO] Aluguel em atraso — ' + cli.nome
       : '[ATENÇÃO] Aluguel vence em ' + diff + ' dia(s) — ' + cli.nome;
 
-    var corpo = emailHtml(cli.nome, c.imovel, valorFmt, diaV, diff, tipo);
+    var corpo = emailHtml(cli.nome, imovNome, valorFmt, diaV, diff, tipo);
 
     try {
       var resendPayload = JSON.stringify({
