@@ -107,7 +107,7 @@ async function openClienteModal(id = null) {
   const footer = `
     <button class="btn btn-ghost" onclick="import('./utils.js').then(m=>m.closeModal())">Cancelar</button>
     <button class="btn btn-primary" id="btnSalvarCliente"><i data-lucide="save"></i>${id ? 'Salvar' : 'Cadastrar'}</button>`;
-  await openModal(id ? 'Editar Cliente' : 'Novo Cliente', body, footer);
+  openModal(id ? 'Editar Cliente' : 'Novo Cliente', body, footer);
   document.getElementById('btnSalvarCliente')?.addEventListener('click', async () => {
     const nome = document.getElementById('fNome').value.trim();
     if (!nome) { toast('Nome é obrigatório.', 'error'); return; }
