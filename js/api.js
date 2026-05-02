@@ -53,6 +53,12 @@ export const getCliente = id => call({ action: 'getCliente', id });
 export const saveCliente = data => post('saveCliente', data);
 export const deleteCliente = id => post('deleteCliente', { id });
 
+// Imóveis
+export const getImoveis = () => call({ action: 'getImoveis' });
+export const getImovel = id => call({ action: 'getImovel', id });
+export const saveImovel = data => post('saveImovel', data);
+export const deleteImovel = id => post('deleteImovel', { id });
+
 // Contratos
 export const getContratos = () => call({ action: 'getContratos' });
 export const getContrato = id => call({ action: 'getContrato', id });
