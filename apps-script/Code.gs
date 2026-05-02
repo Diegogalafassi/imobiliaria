@@ -10,6 +10,52 @@ var RESEND_API_KEY = 're_bCjBeTmo_4GLS8Feu97CWfA5MGsQkKR1K';
 // Quando tiver domínio verificado no Resend, troque por: 'Diego Imobiliária <alerta@seudominio.com>'
 var RESEND_FROM = 'Diego Imobiliária <onboarding@resend.dev>';
 
+// =============================================
+//  MENU NO GOOGLE SHEETS
+// =============================================
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('🏠 Diego Imobiliária')
+    .addItem('✅ Verificar Vencimentos Agora', 'checkVencimentos')
+    .addSeparator()
+    .addItem('⏰ Ativar Alertas Diários (8h)', 'createDailyTrigger')
+    .addItem('🗑️ Remover Alertas Diários', 'removeDailyTrigger')
+    .addSeparator()
+    .addItem('📋 Ver Log de Alertas Enviados', 'showAlertLog')
+    .addToUi();
+}
+
+function createDailyTrigger() {
+  // Remove triggers existentes para não duplicar
+  removeDailyTrigger();
+  ScriptApp.newTrigger('checkVencimentos')
+    .timeBased()
+    .everyDays(1)
+    .atHour(8)
+    .create();
+  SpreadsheetApp.getUi().alert('✅ Alertas diários ativados!\nTodo dia às 8h o sistema verificará os vencimentos e enviará e-mails automaticamente.');
+}
+
+function removeDailyTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t) {
+    if (t.getHandlerFunction() === 'checkVencimentos') {
+      ScriptApp.deleteTrigger(t);
+    }
+  });
+}
+
+function showAlertLog() {
+  var logs = sheetToObjects(getSheet('AlertasLog'));
+  if (!logs.length) {
+    SpreadsheetApp.getUi().alert('Nenhum alerta foi enviado ainda.');
+    return;
+  }
+  var msg = logs.slice(-10).reverse().map(function(l) {
+    return '• ' + l.dataEnvio + ' | ' + l.tipo + ' | Contrato: ' + l.contratoId;
+  }).join('\n');
+  SpreadsheetApp.getUi().alert('Últimos 10 alertas enviados:\n\n' + msg);
+}
+
 // ---- Helpers de Sheets ----
 function getSheet(name) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
