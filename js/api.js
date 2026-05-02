@@ -1,14 +1,14 @@
 // ===== API CLIENT =====
 // Calls Google Apps Script Web App as backend
 
-const CONFIG_KEY = 'diegoimob_api_url';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby4S2kc98PpiKueLvb1lcDzTFiPc2Bwqusgdrtcw51x0ENLZeZzFfSaICTaRPvTvBzt/exec';
 
 export function getApiUrl() {
-  return localStorage.getItem(CONFIG_KEY) || '';
+  return WEB_APP_URL;
 }
 
 export function setApiUrl(url) {
-  localStorage.setItem(CONFIG_KEY, url);
+  // Obsoleto, URL agora é hardcoded
 }
 
 async function call(params) {
