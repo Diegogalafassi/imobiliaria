@@ -131,7 +131,7 @@ async function openContratoModal(id = null) {
   const footer = `
     <button class="btn btn-ghost" onclick="import('./utils.js').then(m=>m.closeModal())">Cancelar</button>
     <button class="btn btn-primary" id="btnSalvarContrato"><i data-lucide="save"></i>${id ? 'Salvar' : 'Criar Contrato'}</button>`;
-  await openModal(id ? 'Editar Contrato' : 'Novo Contrato', body, footer);
+  openModal(id ? 'Editar Contrato' : 'Novo Contrato', body, footer);
   
   document.getElementById('fImovel')?.addEventListener('change', (e) => {
     const imo = allImoveis.find(x => x.id === e.target.value);
@@ -252,7 +252,7 @@ async function openPagamentoModal(contratoId, valorPadrao, clienteId) {
   const footer = `
     <button class="btn btn-ghost" onclick="import('./utils.js').then(m=>m.closeModal())">Cancelar</button>
     <button class="btn btn-success" id="btnSalvarPag"><i data-lucide="check"></i>Registrar</button>`;
-  await openModal('Registrar Pagamento', body, footer);
+  openModal('Registrar Pagamento', body, footer);
   document.getElementById('btnSalvarPag')?.addEventListener('click', async () => {
     const mesReferencia = document.getElementById('pMes').value;
     const valor = parseFloat(document.getElementById('pValor').value);
