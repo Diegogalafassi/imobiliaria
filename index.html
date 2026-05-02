@@ -1,1 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diego Imobiliária — Gestão de Aluguéis</title>
+  <meta name="description" content="Sistema de gestão de contratos de aluguel para Diego Imobiliária. Controle completo de clientes, contratos e vencimentos." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
 
+  <!-- SIDEBAR (Desktop) -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <i data-lucide="building-2"></i>
+      </div>
+      <div class="logo-text">
+        <span class="logo-title">Diego</span>
+        <span class="logo-sub">Imobiliária</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#dashboard" class="nav-item active" id="nav-dashboard">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="#clientes" class="nav-item" id="nav-clientes">
+        <i data-lucide="users"></i>
+        <span>Clientes</span>
+      </a>
+      <a href="#contratos" class="nav-item" id="nav-contratos">
+        <i data-lucide="file-text"></i>
+        <span>Contratos</span>
+      </a>
+      <a href="#pagamentos" class="nav-item" id="nav-pagamentos">
+        <i data-lucide="receipt"></i>
+        <span>Pagamentos</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="#configuracoes" class="nav-item" id="nav-configuracoes">
+        <i data-lucide="settings"></i>
+        <span>Configurações</span>
+      </a>
+      <div class="sidebar-version">v1.0.0</div>
+    </div>
+  </aside>
+
+  <!-- MOBILE OVERLAY -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="main-wrapper">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menu">
+        <i data-lucide="menu"></i>
+      </button>
+      <div class="topbar-center">
+        <div class="search-wrap" id="searchWrap" style="display:none;">
+          <i data-lucide="search"></i>
+          <input type="text" id="globalSearch" placeholder="Buscar cliente ou contrato..." />
+        </div>
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="refreshBtn" title="Atualizar dados">
+          <i data-lucide="refresh-cw"></i>
+        </button>
+        <div class="topbar-date" id="topbarDate"></div>
+      </div>
+    </header>
+
+    <!-- PAGE CONTENT -->
+    <main class="page-content" id="pageContent">
+      <!-- Views are injected here by JS -->
+      <div class="loading-screen" id="loadingScreen">
+        <div class="spinner-wrap">
+          <div class="spinner"></div>
+          <p>Carregando dados...</p>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- MOBILE BOTTOM NAV -->
+  <nav class="bottom-nav" id="bottomNav">
+    <a href="#dashboard" class="bottom-nav-item active" id="bnav-dashboard">
+      <i data-lucide="layout-dashboard"></i>
+      <span>Dashboard</span>
+    </a>
+    <a href="#clientes" class="bottom-nav-item" id="bnav-clientes">
+      <i data-lucide="users"></i>
+      <span>Clientes</span>
+    </a>
+    <a href="#contratos" class="bottom-nav-item" id="bnav-contratos">
+      <i data-lucide="file-text"></i>
+      <span>Contratos</span>
+    </a>
+    <a href="#pagamentos" class="bottom-nav-item" id="bnav-pagamentos">
+      <i data-lucide="receipt"></i>
+      <span>Pagamentos</span>
+    </a>
+    <a href="#configuracoes" class="bottom-nav-item" id="bnav-configuracoes">
+      <i data-lucide="settings"></i>
+      <span>Config</span>
+    </a>
+  </nav>
+
+  <!-- GLOBAL MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Modal</h3>
+        <button class="modal-close" id="modalClose" aria-label="Fechar">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer" id="modalFooter"></div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- CONFIG ALERT (shown when Apps Script URL is not set) -->
+  <div class="config-alert" id="configAlert" style="display:none;">
+    <div class="config-alert-inner">
+      <i data-lucide="alert-triangle"></i>
+      <div>
+        <strong>URL do Apps Script não configurada</strong>
+        <p>Vá em <a href="#configuracoes">Configurações</a> e insira a URL do Web App do Google Apps Script.</p>
+      </div>
+      <button onclick="document.getElementById('configAlert').style.display='none'">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script type="module" src="js/app.js"></script>
+
+</body>
+</html>
