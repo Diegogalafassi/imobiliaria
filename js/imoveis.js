@@ -109,7 +109,7 @@ async function openImovelModal(id = null) {
   const footer = `
     <button class="btn btn-ghost" onclick="import('./utils.js').then(m=>m.closeModal())">Cancelar</button>
     <button class="btn btn-primary" id="btnSalvarImovel"><i data-lucide="save"></i>${id ? 'Salvar' : 'Cadastrar'}</button>`;
-  await openModal(id ? 'Editar Imóvel' : 'Novo Imóvel', body, footer);
+  openModal(id ? 'Editar Imóvel' : 'Novo Imóvel', body, footer);
   
   document.getElementById('btnSalvarImovel')?.addEventListener('click', async () => {
     const nome = document.getElementById('fNomeImovel').value.trim();
