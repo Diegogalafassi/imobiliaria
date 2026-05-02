@@ -3,6 +3,7 @@ import { formatCurrency, formatDate, getInitials, avatarColor, statusBadge, toas
 
 let allContratos = [];
 let allClientes = [];
+let allImoveis = [];
 
 export async function renderContratos(container) {
   container.innerHTML = `
@@ -36,9 +37,10 @@ export async function renderContratos(container) {
 
 async function loadContratos() {
   try {
-    const [cRes, clRes] = await Promise.all([api.getContratos(), api.getClientes()]);
+    const [cRes, clRes, iRes] = await Promise.all([api.getContratos(), api.getClientes(), api.getImoveis()]);
     allContratos = cRes.data || [];
     allClientes = clRes.data || [];
+    allImoveis = iRes.data || [];
     renderContratosTable(allContratos);
   } catch (e) {
     document.getElementById('contratosTbody').innerHTML = `<tr><td colspan="7"><div class="empty-state"><i data-lucide="wifi-off"></i><h3>Erro ao carregar</h3><p>${escHtml(e.message)}</p></div></td></tr>`;
@@ -71,7 +73,7 @@ function renderContratosTable(list) {
           <span>${escHtml(c.clienteNome||'—')}</span>
         </div>
       </td>
-      <td>${escHtml(c.imovel||'—')}</td>
+      <td>${escHtml(c.imovelNome||'—')}</td>
       <td style="font-weight:600;color:var(--accent-light)">${formatCurrency(c.valor)}</td>
       <td>Dia ${c.diaVencimento||'—'}</td>
       <td>${statusBadge(c.statusAtual||'pendente')}</td>
@@ -100,7 +102,10 @@ async function openContratoModal(id = null) {
       </div>
       <div class="form-group full">
         <label class="form-label">Endereço / Imóvel <span>*</span></label>
-        <input class="form-input" id="fImovel" value="${escHtml(c.imovel)}" placeholder="Ex: Rua das Flores, 123 - Apto 201" />
+        <select class="form-input" id="fImovel">
+          <option value="">Selecione...</option>
+          ${allImoveis.map(i => `<option value="${i.id}" ${i.id===c.imovel?'selected':''}>${escHtml(i.nome)}</option>`).join('')}
+        </select>
       </div>
       <div class="form-group">
         <label class="form-label">Valor do aluguel (R$) <span>*</span></label>
@@ -127,6 +132,15 @@ async function openContratoModal(id = null) {
     <button class="btn btn-ghost" onclick="import('./utils.js').then(m=>m.closeModal())">Cancelar</button>
     <button class="btn btn-primary" id="btnSalvarContrato"><i data-lucide="save"></i>${id ? 'Salvar' : 'Criar Contrato'}</button>`;
   await openModal(id ? 'Editar Contrato' : 'Novo Contrato', body, footer);
+  
+  document.getElementById('fImovel')?.addEventListener('change', (e) => {
+    const imo = allImoveis.find(x => x.id === e.target.value);
+    if (imo) {
+      if (!document.getElementById('fValor').value) document.getElementById('fValor').value = imo.valorPadrao || '';
+      if (!document.getElementById('fDia').value) document.getElementById('fDia').value = imo.diaVencimentoPadrao || '';
+    }
+  });
+
   document.getElementById('btnSalvarContrato')?.addEventListener('click', async () => {
     const clienteId = document.getElementById('fCliId').value;
     const imovel = document.getElementById('fImovel').value.trim();
@@ -153,7 +167,7 @@ export async function renderContratoDetalhe(container, id) {
     container.innerHTML = `
       <div class="detail-header">
         <a href="#contratos" class="back-btn"><i data-lucide="arrow-left"></i>Contratos</a>
-        <h2 class="detail-title">${escHtml(c.imovel)}</h2>
+        <h2 class="detail-title">${escHtml(c.imovelNome)}</h2>
         ${statusBadge(c.statusAtual||'pendente')}
         <div style="margin-left:auto;display:flex;gap:8px">
           <button class="btn btn-ghost btn-sm" onclick="window.__editContrato('${id}')"><i data-lucide="pencil"></i>Editar</button>
