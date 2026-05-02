@@ -1,5 +1,6 @@
 import { renderDashboard } from './dashboard.js';
 import { renderClientes } from './clientes.js';
+import { renderImoveis } from './imoveis.js';
 import { renderContratos, renderContratoDetalhe } from './contratos.js';
 import { renderPagamentos } from './pagamentos.js';
 import { renderConfiguracoes } from './configuracoes.js';
@@ -9,6 +10,7 @@ import { getApiUrl } from './api.js';
 const routes = {
   dashboard:    { title: 'Dashboard',   nav: 'dashboard',   render: renderDashboard },
   clientes:     { title: 'Clientes',    nav: 'clientes',    render: renderClientes },
+  imoveis:      { title: 'Imóveis',     nav: 'imoveis',     render: renderImoveis },
   contratos:    { title: 'Contratos',   nav: 'contratos',   render: renderContratos },
   pagamentos:   { title: 'Pagamentos',  nav: 'pagamentos',  render: renderPagamentos },
   configuracoes:{ title: 'Configurações',nav:'configuracoes',render: renderConfiguracoes },
