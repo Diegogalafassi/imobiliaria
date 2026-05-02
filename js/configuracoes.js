@@ -11,18 +11,6 @@ export async function renderConfiguracoes(container) {
 
   container.innerHTML = `
     <div style="max-width:640px">
-      <div class="settings-section">
-        <h3>🔗 Conexão com Google Apps Script</h3>
-        <p>Cole aqui a URL do Web App publicado no Google Apps Script. Sem isso, o sistema não consegue acessar os dados.</p>
-        <div class="form-group">
-          <label class="form-label">URL do Web App</label>
-          <div style="display:flex;gap:8px">
-            <input class="form-input" id="cfgApiUrl" value="${escHtml(savedUrl)}" placeholder="https://script.google.com/macros/s/.../exec" style="flex:1" />
-            <button class="btn btn-primary" id="btnSalvarUrl"><i data-lucide="link"></i>Salvar URL</button>
-          </div>
-          ${savedUrl ? `<div style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:13px;color:var(--success)"><i data-lucide="check-circle" style="width:14px;height:14px"></i>URL configurada</div>` : `<div style="font-size:12px;color:var(--warning);margin-top:8px">⚠️ URL não configurada — veja o guia de instalação abaixo.</div>`}
-        </div>
-      </div>
 
       <div class="settings-section">
         <h3>🔔 Configurações de Alertas</h3>
@@ -65,15 +53,6 @@ export async function renderConfiguracoes(container) {
     </div>`;
 
   lucide.createIcons({ nodes: [container] });
-
-  document.getElementById('btnSalvarUrl').addEventListener('click', () => {
-    const url = document.getElementById('cfgApiUrl').value.trim();
-    if (!url) { toast('Insira a URL do Apps Script.', 'error'); return; }
-    setApiUrl(url);
-    document.getElementById('configAlert').style.display = 'none';
-    toast('URL salva! Recarregando...', 'success');
-    setTimeout(() => location.reload(), 1200);
-  });
 
   document.getElementById('btnSalvarConfig').addEventListener('click', async () => {
     const email = document.getElementById('cfgEmail').value.trim();
